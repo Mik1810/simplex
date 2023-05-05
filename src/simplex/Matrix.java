@@ -4,42 +4,49 @@ import java.util.Queue;
 
 public class Matrix {
 
-	private double[][] A;
-	private double[] c;
-	private double[][] B;
-	private int[] indexes; //indici delle colonne di A che formano N
-
+	private double[][] M;
+	//private double[] c;
+	//private double[][] B;
+	//private int[] indexes; indici delle colonne di A che formano N
+	
+	/**
+	 * @param matrice di double 
+	 */
 	public Matrix(double[][] A) {
-		this.A = A;
+		this.M = A;
 	}
-
-	public Matrix(double[][] A, double[] c, double[][] B, int[] indexes) {
-		this.A = A;
-		this.c = c;
-		this.B = B;
-		this.indexes = indexes;
+	
+	/**
+	 * @param vettore di double
+	 */
+	public Matrix(double[] A) {
+		this.M = new double[1][A.length];
+		for(int i = 0; i < A.length; i++) {
+			this.M[0][i] = A[i];
+		}
 	}
 
 	public double[][] getMatrix() {
-		return A;
+		return M;
 	}
 
 	public double getDeterminant() throws Exception {
-		return det(A.length, A);
+		if (!this.checkSquared()) throw new Exception("The matrix isn't squared");
+		return det(M.length, M);
 	}
 
 	@Override
 	public String toString() {
 
 		String result = "";
-		for (int i = 0; i < A.length; i++) {
+		for (int i = 0; i < M.length; i++) {
 			String s = "";
-			for (int j = 0; j < A[i].length; j++) {
-				if(A[i][j] == -0.0) A[i][j] = 0.0;
-				if (A[i][j] >= 0) {
-					s = s + "  " + String.format("%.1f", A[i][j]); // per l'indentazione
+			for (int j = 0; j < M[i].length; j++) {
+				if(M[i][j] == -0.0) M[i][j] = 0.0;
+				if (M[i][j] >= 0) {
+					s = s + "  " + String.format("%.1f", M[i][j]); // per l'indentazione
 				} else {
-					s = s + " " + String.format("%.1f", A[i][j]);
+					s = s + " " + String.format("%.1f", M[i][j]);
 				}
 			}
 			s = "[" + s + " ]\n"; // stampo le righe dell'array e poi le accorpo creando una matrice
@@ -48,11 +55,8 @@ public class Matrix {
 		return result;
 	}
 
-	public static double det(int n, double matrix[][]) throws Exception {
+	public double det(int n, double matrix[][]) throws Exception {
 		
-		Matrix g = new Matrix(matrix);
-		if (!g.checkSquared())
-			throw new Exception("The matrix isn't squared");
 		double det = 0;
 		double[][] subMatrix = new double[n][n];
 
@@ -84,24 +88,22 @@ public class Matrix {
 		}
 	}
 
-	public static Matrix reverseMatrix(double[][] A) throws Exception {
+	public Matrix reverseMatrix() throws Exception {
 
-		Matrix m = new Matrix(A);
-		if (!m.checkSquared())
+		if (!this.checkSquared())
 			throw new Exception("The matrix isn't squared");
 		
-		switch (A.length) {
+		switch (M.length) {
 		case 1:
-			return m;
+			return this;
 
 		case 2:
-			System.out.println(m);
-			double det = m.getDeterminant();
+			double det = this.getDeterminant();
 			double[][] temp = new double[2][2];
-			temp[0][0] = A[1][1] * (1 / det);
-			temp[0][1] = -A[0][1] * (1 / det);
-			temp[1][0] = -A[1][0] * (1 / det);
-			temp[1][1] = A[0][0] * (1 / det);
+			temp[0][0] = M[1][1] * (1 / det);
+			temp[0][1] = -M[0][1] * (1 / det);
+			temp[1][0] = -M[1][0] * (1 / det);
+			temp[1][1] = M[0][0] * (1 / det);
 			return new Matrix(temp);
 
 		case 3:
@@ -110,10 +112,10 @@ public class Matrix {
 			
 			// Calcolo la matrice dei cofattori
 			
-			for(int i = 0; i < A.length; i++) {
-				for(int j = 0; j < A[i].length; j++) {
-					temp2[i][j] = Math.pow(-1, i+j+2) * det(2, m.getSubMatrix(i, j, A));
-					temp2[i][j] = temp2[i][j] / det(A.length, A);
+			for(int i = 0; i < M.length; i++) {
+				for(int j = 0; j < M[i].length; j++) {
+					temp2[i][j] = Math.pow(-1, i+j+2) * det(2, this.getSubMatrix(i, j, M));
+					temp2[i][j] = temp2[i][j] / det(M.length, M);
 				}
 			}
 			
@@ -127,13 +129,13 @@ public class Matrix {
 	
 	public Matrix transpose() throws Exception {
 		
-		double[][] temp = new double[A.length][A.length];
+		double[][] temp = new double[M.length][M.length];
 		
 		if(!this.checkSquared()) throw new Exception("The matrix isn't squared");
 		
-		for(int i = 0; i < A.length; i++) {
-			for(int j = 0; j < A[i].length; j++) {
-				temp[i][j] = A[j][i];
+		for(int i = 0; i < M.length; i++) {
+			for(int j = 0; j < M[i].length; j++) {
+				temp[i][j] = M[j][i];
 			}
 		}
 		return new Matrix(temp);
@@ -162,8 +164,8 @@ public class Matrix {
 	}
 
 	public boolean checkSquared() {
-		for (int i = 0; i < A.length; i++) {
-			if (A.length != A[i].length)
+		for (int i = 0; i < M.length; i++) {
+			if (M.length != M[i].length)
 				return false;
 		}
 		return true;
@@ -212,88 +214,5 @@ public class Matrix {
 		}
 		
 		return new Matrix(result);
-	}
-	
-	public OPTResult testOpt() throws Exception {
-		
-		//B = [A1, A4, A5]
-		//indexes = [1, 4 ,5]
-		
-		OPTResult result = null;
-		
-		//TODO:Aggiungere il check per verificare che sia rettangolare
-		double[][] ctb = new double[1][A.length];
-		System.out.println(A.length);
-		
-		//c è il vettori dei costi
-		//devo ricavare cTb che ha valori non nulli negli indici di colonne 
-		//di base
-		for(int i = 0; i < ctb[0].length; i++) {
-			ctb[0][i] = c[indexes[i]];
-			//Setto i coefficienti in base e lascio a 0 quelli fuori base
-		}
-		
-		Matrix ut = Matrix.matrixProduct(new Matrix(ctb), Matrix.reverseMatrix(this.B));
-		System.out.println("\nUt: "+ut);	
-		
-		return result;
-	}
-
-	public static void main(String[] args) {
-		try {
-			/*double[][] a = { { 2, 0, 0}, { 1, 1, 0}, { 2, 0, 1} };
-			Matrix m = new Matrix(a);
-			
-			//Stampa la matrice
-			System.out.println("Matrice di partenza:");
-			System.out.println(m.toString());
-			
-			//Stampa il determinante della matrice
-			System.out.println("\nDeterminante: ");
-			System.out.println(m.getDeterminant());
-			
-			//Stampa la sottomatrice fissando la riga i-esima e colonna j-esima
-			//RICORDA: gli indici partono da 0
-			System.out.println("\nSottomatrice con riga 3 e colonna 1 fissata: ");
-			System.out.println(new Matrix(m.getSubMatrix(2, 0, a)));
-			
-			//Stampa la matrice inversa
-			System.out.println("\nMatrice inversa:");
-			System.out.println(m.reverseMatrix());
-			
-			//System.out.println("Matrice trasposta: ");
-			System.out.println("\nMatrice trasposta: ");
-			System.out.println(m.transpose());
-			
-			//Prodotto tra matrici
-			System.out.println("\nProdotto tra matrici: ");
-			double[][] d1 = { { 1, 1, 1 }, { 2, 2, 2 }, { 3, 3, 3 }, { 4, 4, 4 } };
-			Matrix D = new Matrix(d1);
-			
-			double e1[][] = { { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 } };
-			Matrix E = new Matrix(e1);
-	
-			System.out.println(Matrix.matrixProduct(D, E));*/
-			
-			double[][] A = {{-1,-1,2,1,0},{1,-2,1,0,1}};
-			double[] c = {-3,2,4,0,0};
-			double[][] B = {{-1,2},{-2,1}};
-			int[] indexes = {2,3};
-			Matrix m1 = new Matrix(A, c, B, indexes);
-			m1.testOpt();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	class OPTResult {
-		protected double[] c;
-		protected boolean opt;
-		
-		public OPTResult(double[] c, boolean opt) {
-			this.c = c;
-			this.opt = opt;
-		}
 	}
 }
