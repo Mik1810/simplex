@@ -5,9 +5,19 @@ import java.util.Queue;
 public class Matrix {
 
 	private double[][] A;
+	private double[] c;
+	private double[][] B;
+	private int[] indexes; //indici delle colonne di A che formano N
 
 	public Matrix(double[][] A) {
 		this.A = A;
+	}
+
+	public Matrix(double[][] A, double[] c, double[][] B, int[] indexes) {
+		this.A = A;
+		this.c = c;
+		this.B = B;
+		this.indexes = indexes;
 	}
 
 	public double[][] getMatrix() {
@@ -38,9 +48,10 @@ public class Matrix {
 		return result;
 	}
 
-	public double det(int n, double matrix[][]) throws Exception {
-
-		if (!this.checkSquared())
+	public static double det(int n, double matrix[][]) throws Exception {
+		
+		Matrix g = new Matrix(matrix);
+		if (!g.checkSquared())
 			throw new Exception("The matrix isn't squared");
 		double det = 0;
 		double[][] subMatrix = new double[n][n];
@@ -73,22 +84,24 @@ public class Matrix {
 		}
 	}
 
-	public Matrix reverseMatrix() throws Exception {
+	public static Matrix reverseMatrix(double[][] A) throws Exception {
 
-		if (!this.checkSquared())
+		Matrix m = new Matrix(A);
+		if (!m.checkSquared())
 			throw new Exception("The matrix isn't squared");
 		
 		switch (A.length) {
 		case 1:
-			return this;
+			return m;
 
 		case 2:
-			double det = this.getDeterminant();
+			System.out.println(m);
+			double det = m.getDeterminant();
 			double[][] temp = new double[2][2];
-			temp[1][1] = A[2][2] * (1 / det);
-			temp[1][2] = -A[1][2] * (1 / det);
-			temp[2][1] = -A[2][1] * (1 / det);
-			temp[2][2] = A[1][1] * (1 / det);
+			temp[0][0] = A[1][1] * (1 / det);
+			temp[0][1] = -A[0][1] * (1 / det);
+			temp[1][0] = -A[1][0] * (1 / det);
+			temp[1][1] = A[0][0] * (1 / det);
 			return new Matrix(temp);
 
 		case 3:
@@ -99,7 +112,7 @@ public class Matrix {
 			
 			for(int i = 0; i < A.length; i++) {
 				for(int j = 0; j < A[i].length; j++) {
-					temp2[i][j] = Math.pow(-1, i+j+2) * det(2, this.getSubMatrix(i, j, A));
+					temp2[i][j] = Math.pow(-1, i+j+2) * det(2, m.getSubMatrix(i, j, A));
 					temp2[i][j] = temp2[i][j] / det(A.length, A);
 				}
 			}
@@ -185,7 +198,7 @@ public class Matrix {
 			}
 			if(temp2 != CColumns) throw new Exception("Matrix has different dimensions!");
 		}
-		
+	
 		if(!(BColumns == CRows)) throw new Exception("Cannot do matrix moltiplication");
 		
 		result = new double[BRows][CColumns];
@@ -200,10 +213,35 @@ public class Matrix {
 		
 		return new Matrix(result);
 	}
+	
+	public OPTResult testOpt() throws Exception {
+		
+		//B = [A1, A4, A5]
+		//indexes = [1, 4 ,5]
+		
+		OPTResult result = null;
+		
+		//TODO:Aggiungere il check per verificare che sia rettangolare
+		double[][] ctb = new double[1][A.length];
+		System.out.println(A.length);
+		
+		//c è il vettori dei costi
+		//devo ricavare cTb che ha valori non nulli negli indici di colonne 
+		//di base
+		for(int i = 0; i < ctb[0].length; i++) {
+			ctb[0][i] = c[indexes[i]];
+			//Setto i coefficienti in base e lascio a 0 quelli fuori base
+		}
+		
+		Matrix ut = Matrix.matrixProduct(new Matrix(ctb), Matrix.reverseMatrix(this.B));
+		System.out.println("\nUt: "+ut);	
+		
+		return result;
+	}
 
 	public static void main(String[] args) {
 		try {
-			double[][] a = { { 2, 0, 0}, { 1, 1, 0}, { 2, 0, 1} };
+			/*double[][] a = { { 2, 0, 0}, { 1, 1, 0}, { 2, 0, 1} };
 			Matrix m = new Matrix(a);
 			
 			//Stampa la matrice
@@ -235,10 +273,27 @@ public class Matrix {
 			double e1[][] = { { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 } };
 			Matrix E = new Matrix(e1);
 	
-			System.out.println(Matrix.matrixProduct(D, E));
+			System.out.println(Matrix.matrixProduct(D, E));*/
+			
+			double[][] A = {{-1,-1,2,1,0},{1,-2,1,0,1}};
+			double[] c = {-3,2,4,0,0};
+			double[][] B = {{-1,2},{-2,1}};
+			int[] indexes = {2,3};
+			Matrix m1 = new Matrix(A, c, B, indexes);
+			m1.testOpt();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	class OPTResult {
+		protected double[] c;
+		protected boolean opt;
+		
+		public OPTResult(double[] c, boolean opt) {
+			this.c = c;
+			this.opt = opt;
 		}
 	}
 }
