@@ -1,3 +1,4 @@
+package simplex;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -72,14 +73,14 @@ public class Matrix {
 		}
 	}
 
-	public void reverseMatrix() throws Exception {
+	public Matrix reverseMatrix() throws Exception {
 
 		if (!this.checkSquared())
 			throw new Exception("The matrix isn't squared");
 		
 		switch (A.length) {
 		case 1:
-			return;
+			return this;
 
 		case 2:
 			double det = this.getDeterminant();
@@ -88,8 +89,7 @@ public class Matrix {
 			temp[1][2] = -A[1][2] * (1 / det);
 			temp[2][1] = -A[2][1] * (1 / det);
 			temp[2][2] = A[1][1] * (1 / det);
-			this.A = temp;
-			break;
+			return new Matrix(temp);
 
 		case 3:
 			//Inizializzo la matrice dei cofattori
@@ -104,9 +104,7 @@ public class Matrix {
 				}
 			}
 			
-			A = temp2;
-			this.transpose();
-			break;
+			return new Matrix(temp2).transpose();
 
 		default:
 			throw new Exception("Inverse of matrix 3x3 + not yet implemented");
@@ -114,7 +112,7 @@ public class Matrix {
 		}
 	}
 	
-	public void transpose() throws Exception {
+	public Matrix transpose() throws Exception {
 		
 		double[][] temp = new double[A.length][A.length];
 		
@@ -125,10 +123,10 @@ public class Matrix {
 				temp[i][j] = A[j][i];
 			}
 		}
-		A = temp;
+		return new Matrix(temp);
 	}
 		
-	public double[][] getSubMatrix(int i, int j, double[][] t) {
+	private double[][] getSubMatrix(int i, int j, double[][] t) {
 		
 		//i è la riga, j è la colonna
 		double[][] temp = new double[2][2];
@@ -157,6 +155,51 @@ public class Matrix {
 		}
 		return true;
 	}
+	
+	public static Matrix matrixProduct(Matrix B, Matrix C) throws Exception {
+		
+		double[][] result;
+		
+		int BRows = B.getMatrix().length;
+		int BColumns = 0;
+		int CRows = C.getMatrix().length;
+		int CColumns = 0;
+		
+		int temp1 = B.getMatrix()[0].length;
+		int temp2 = C.getMatrix()[0].length;
+		
+		//TODO: aggiungere un metodo che controlla le dimensioni
+		for(int i = 0; i < BRows; i++) {
+			BColumns = 0;
+			for(int j = 0; j < B.getMatrix()[i].length; j++) {
+				BColumns++;
+			}
+			if(temp1 != BColumns) throw new Exception("Matrix has different dimensions!");
+		}
+		
+		for(int i = 0; i < CRows; i++) {
+			CColumns = 0;
+			for(int j = 0; j < C.getMatrix()[i].length; j++) {
+				CColumns++;
+				
+			}
+			if(temp2 != CColumns) throw new Exception("Matrix has different dimensions!");
+		}
+		
+		if(!(BColumns == CRows)) throw new Exception("Cannot do matrix moltiplication");
+		
+		result = new double[BRows][CColumns];
+		
+		for (int i = 0; i < BRows; i++) {
+			for (int j = 0; j < CColumns; j++) {
+				for (int k = 0; k < CRows; k++) {
+					result[i][j] = result[i][j] + B.getMatrix()[i][k] * C.getMatrix()[k][j];
+				}
+			}
+		}
+		
+		return new Matrix(result);
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -177,13 +220,24 @@ public class Matrix {
 			System.out.println(new Matrix(m.getSubMatrix(2, 0, a)));
 			
 			//Stampa la matrice inversa
-			m.reverseMatrix();
 			System.out.println("\nMatrice inversa:");
-			System.out.println(m);
+			System.out.println(m.reverseMatrix());
 			
 			//System.out.println("Matrice trasposta: ");
+			System.out.println("\nMatrice trasposta: ");
+			System.out.println(m.transpose());
+			
+			//Prodotto tra matrici
+			System.out.println("\nProdotto tra matrici: ");
+			double[][] d1 = { { 1, 1, 1 }, { 2, 2, 2 }, { 3, 3, 3 }, { 4, 4, 4 } };
+			Matrix D = new Matrix(d1);
+			
+			double e1[][] = { { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 } };
+			Matrix E = new Matrix(e1);
+	
+			System.out.println(Matrix.matrixProduct(D, E));
+			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
