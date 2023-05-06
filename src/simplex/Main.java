@@ -47,6 +47,15 @@ public class Main {
 			double[][] B = {{-1,2},{-2,1}};
 			int[] indexes = {2,3};
 			
+			double[][] A1 = {{-1,0,1,0},
+							 {1,0,1,1},
+							 {0,1,0,0},
+							 {1,1,3,1}};
+			
+			Matrix m = new Matrix(A1);
+			System.out.println(m + "Righe: "+m.rows+" Colonne: "+m.columns);
+			System.out.println(m.reverseMatrix()	);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
