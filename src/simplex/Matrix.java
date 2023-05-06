@@ -6,7 +6,7 @@ import java.util.Queue;
 public class Matrix {
 
 	private double[][] M;
-	public int rows, columns;
+	private int rows, columns;
 	// private double[] c;
 	// private double[][] B;
 	// private int[] indexes; indici delle colonne di A che formano N
@@ -44,6 +44,14 @@ public class Matrix {
 		}
 	}
 
+	public int getRows() {
+		return rows;
+	}
+
+	public int getColumns() {
+		return columns;
+	}
+
 	public double[][] getMatrix() {
 		return M;
 	}
@@ -52,6 +60,24 @@ public class Matrix {
 		if (!this.checkSquared())
 			throw new Exception("The matrix isn't squared");
 		return det(this.rows, this.M);
+	}
+
+	public double toValue() throws Exception {
+		if (rows == 1 && columns == 1)
+			return M[0][0];
+		throw new Exception("Unable to extract value from a Matrix that isn't 1x1");
+	}
+
+	public Matrix selectColumn(int k) throws Exception {
+		if (k > columns)
+			throw new Exception("Unable to select the " + k + " column");
+
+		double[][] temp = new double[rows][1];
+
+		for (int i = 0; i < rows; i++) {
+			temp[i][0] = M[i][k-1];
+		}
+		return new Matrix(temp);
 	}
 
 	@Override
@@ -126,9 +152,10 @@ public class Matrix {
 			double[][] temp2 = new double[rows][rows];
 
 			// Calcolo la matrice dei cofattori
-			
+
 			double mDet = det(M.length, M);
-			if(mDet == 0) throw new Exception("La matrice non è invertibile!");
+			if (mDet == 0)
+				throw new Exception("La matrice non è invertibile!");
 			for (int i = 0; i < M.length; i++) {
 				for (int j = 0; j < M[i].length; j++) {
 					double[][] subMatrix = this.getSubMatrix(i, j, M);
@@ -140,9 +167,9 @@ public class Matrix {
 
 			return new Matrix(temp2).transpose();
 
-		/*default:
-			throw new Exception("Inverse of matrix 3x3 + not yet implemented");
-		*/
+		/*
+		 * default: throw new Exception("Inverse of matrix 3x3 + not yet implemented");
+		 */
 		}
 	}
 
@@ -192,14 +219,37 @@ public class Matrix {
 		return true;
 	}
 
-	public static Matrix subtructMatrix(Matrix A, Matrix B) throws Exception {
-		Matrix result = null;
+	public Matrix multiplyMatrixFor(double k) throws Exception {
 
-		for (int i = 0; i < A.getDeterminant(); i++) {
+		double[][] temp = new double[rows][columns];
 
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				temp[i][j] = this.M[i][j] * k;
+			}
+		}
+		return new Matrix(temp);
+	}
+
+	public static Matrix addMatrix(Matrix A, Matrix B) throws Exception {
+
+		if (A.rows != B.rows || A.columns != B.columns)
+			throw new Exception("A and B don't have same dimensions!");
+
+		double[][] temp = new double[A.rows][B.rows];
+
+		for (int i = 0; i < A.rows; i++) {
+			for (int j = 0; j < A.columns; j++) {
+				temp[i][j] = A.M[i][j] + B.M[i][j];
+			}
 		}
 
-		return result;
+		return new Matrix(temp);
+	}
+
+	public static Matrix subtructMatrix(Matrix A, Matrix B) throws Exception {
+
+		return addMatrix(A, B.multiplyMatrixFor(-1));
 	}
 
 	public static Matrix matrixProduct(Matrix B, Matrix C) throws Exception {

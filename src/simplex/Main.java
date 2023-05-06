@@ -42,9 +42,14 @@ public class Main {
 	
 			System.out.println(Matrix.matrixProduct(D, E));*/
 			
-			double[][] A = {{-1,-1,2,1,0},{1,-2,1,0,1}};
+			double[][] A = {{-1,-1,2,1,0},
+							{1,-2,1,0,1}};
+			
 			double[] c = {-3,2,4,0,0};
-			double[][] B = {{-1,2},{-2,1}};
+			
+			double[][] B = {{-1,2},
+							{-2,1}};
+			
 			int[] indexes = {2,3};
 			
 			double[][] A1 = {{-1,0,1,0},
@@ -52,9 +57,17 @@ public class Main {
 							 {0,1,0,0},
 							 {1,1,3,1}};
 			
+			double[][] B1 = {{1,-2},
+							 {2,-1}};
+			
 			Matrix m = new Matrix(A1);
-			System.out.println(m + "Righe: "+m.rows+" Colonne: "+m.columns);
-			System.out.println(m.reverseMatrix()	);
+			//System.out.println(m + "Righe: "+m.getRows()+" Colonne: "+m.getColumns());
+			//System.out.println(m.reverseMatrix());
+			
+			//System.out.println(Matrix.addMatrix(new Matrix(B), new Matrix(B1)));
+			
+			//System.out.println(new Matrix(B).reverseMatrix());
+			new Simplex(new Matrix(A), new Matrix(B), new Matrix(c), indexes).compute();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
