@@ -60,14 +60,17 @@ public class Main {
 			double[][] B1 = {{1,-2},
 							 {2,-1}};
 			
+			double[] b = {1, -1};
+			
 			Matrix m = new Matrix(A1);
+			
 			//System.out.println(m + "Righe: "+m.getRows()+" Colonne: "+m.getColumns());
 			//System.out.println(m.reverseMatrix());
 			
 			//System.out.println(Matrix.addMatrix(new Matrix(B), new Matrix(B1)));
 			
 			//System.out.println(new Matrix(B).reverseMatrix());
-			new Simplex(new Matrix(A), new Matrix(B), new Matrix(c), indexes).compute();
+			new Simplex(new Matrix(A), new Matrix(B), new Matrix(c), indexes, new Matrix(b)).compute();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

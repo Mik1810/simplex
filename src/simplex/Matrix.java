@@ -172,16 +172,17 @@ public class Matrix {
 		 */
 		}
 	}
-
+	
+	public void print(String s) {
+		System.out.println(s+this);
+	}
+	
 	public Matrix transpose() throws Exception {
 
-		double[][] temp = new double[M.length][M.length];
+		double[][] temp = new double[this.columns][this.rows];
 
-		if (!this.checkSquared())
-			throw new Exception("The matrix isn't squared");
-
-		for (int i = 0; i < M.length; i++) {
-			for (int j = 0; j < M[i].length; j++) {
+		for (int i = 0; i < this.columns; i++) {
+			for (int j = 0; j < this.rows; j++) {
 				temp[i][j] = M[j][i];
 			}
 		}
