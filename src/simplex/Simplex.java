@@ -64,13 +64,36 @@ public class Simplex {
 		
 		return new OPTResult(new Matrix(cr), opt);
 	}
+	
+	private boolean testIllim(OPTResult opt) throws Exception {
+		
+		boolean illim = true;
+		
+		//Cerco la variabile entrante
+		int h = 0;
+		for(h = 0; h < opt.c.getMatrix()[0].length; h++) {
+			if(opt.c.getMatrix()[0][h] < 0) break;
+		}
+		
+		//Colonna entrante
+		Matrix joiningColumn = Matrix.matrixProduct(B.reverseMatrix(), A.selectColumn(h+1));
+
+		for(int i = 0; i < joiningColumn.getRows(); i++) {
+			if(joiningColumn.getMatrix()[0][i] > 0) illim = false;
+		}
+		
+		return illim;
+	}
 
 	public Matrix compute() throws Exception{
 		
 		OPTResult optimality = this.testOpt();
-
+		
 		if(optimality.opt) System.out.println("La soluzione è ottimale");
 		else System.out.println("La soluzione non è ottimale");
+		
+		if(this.testIllim(optimality)) throw new Exception("STOP: Problema illimitato");
+
 		return null;
 	}
 
