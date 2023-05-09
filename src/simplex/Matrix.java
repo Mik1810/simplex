@@ -7,9 +7,6 @@ public class Matrix {
 
 	private double[][] M;
 	private int rows, columns;
-	// private double[] c;
-	// private double[][] B;
-	// private int[] indexes; indici delle colonne di A che formano N
 
 	/**
 	 * @param matrice di double

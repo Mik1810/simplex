@@ -30,12 +30,24 @@ public class Simplex {
 		}
 	}
 
-	public Simplex(Matrix A, Matrix c, int[] indexes, Matrix b) {
-		this.A = A;
-		this.c = c;
-		this.indexes = indexes;
-		this.b = b;
+	public Simplex(Matrix A, Matrix c, Matrix b, int[] indexes) {
 		try {
+			this.A = A;
+			this.c = c;
+			this.indexes = indexes;
+			this.b = b;
+			this.B = updateBase();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Simplex(double[][] A, double[] c, double[] b, int[] indexes) {
+		try {
+			this.A = new Matrix(A);
+			this.c = new Matrix(c);
+			this.b = new Matrix(b);
+			this.indexes = indexes;
 			this.B = updateBase();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -53,7 +65,7 @@ public class Simplex {
 			}
 		}
 
-		return  new Matrix(bTemp).transpose();
+		return new Matrix(bTemp).transpose();
 	}
 
 	private OPTResult testOpt() throws Exception {
@@ -127,7 +139,7 @@ public class Simplex {
 
 			// Se la soluzione è ottima
 			if (this.opt) {
-				
+
 				Matrix xstar = Matrix.matrixProduct(B.reverseMatrix(), b.transpose());
 				xstar.print("x* : \n");
 
@@ -175,15 +187,18 @@ public class Simplex {
 
 					// Calcolo il minimo argomento
 					double min = Double.MAX_VALUE;
+
 					for (int i = 0; i < B.getRows(); i++) {
 						temp[i] = bs[i][0] / Ah.getMatrix()[i][0];
-						
-						//Gli aih devono essere maggiori di 0 per evitare di looppare su una 
-						//base degenere
-						if (temp[i] < min && Ah.getMatrix()[i][0] > 0)
+
+						// Gli aih devono essere maggiori di 0 per evitare di looppare su una
+						// base degenere
+
+						//Se il minimo corrente è minore di quello salvato e l'aih è > 0
+						if (temp[i] < min && Ah.getMatrix()[i][0] > 0) {
 							min = temp[i];
+						}
 					}
-					
 
 					// La colonna da sostituire si trova nella posizione t+1
 					int t = Arrays.stream(temp).boxed().collect(Collectors.toList()).indexOf(min);
