@@ -216,6 +216,28 @@ public class Matrix {
 		}
 		return true;
 	}
+	
+	public Matrix sliceColumns(int index1, int index2) throws Exception {
+		if(index1 < 1 || index1 > getColumns() || index2 < 1 || index2 > getColumns())
+			throw new Exception("The indexes must be included between 1 and "+getColumns());
+		
+		Queue<Double> queue = new LinkedList<>();
+		
+		double[][] temp = new double[this.getRows()][this.getRows()];
+		for(int i = 0; i < this.getRows(); i++) {
+			for(int j = 0; j < this.getColumns(); j++) {
+				if(j == index1 - 1 || j == index2 - 1) continue;
+					queue.offer(this.M[i][j]);
+				
+			}
+		}
+		for(int i = 0; i < temp.length; i++) {
+			for(int j = 0; j < temp[i].length; j++) {
+				temp[i][j] = queue.poll().doubleValue();
+			}
+		}
+		return new Matrix(temp);
+	}
 
 	public Matrix multiplyMatrixFor(double k) throws Exception {
 

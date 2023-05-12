@@ -4,11 +4,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.scene.paint.Color;
+import simplex.graph.plot.Piano;
+import simplex.graph.plot.Punto;
+import simplex.graph.plot.Vettore;
+
 public class Simplex {
 
 	private Matrix A, B, c, b;
 	private int[] indexes;
 	private boolean illim, opt;
+	private int it = 1;
+	private Punto oldP;
 
 	class OPTResult {
 		private Matrix c;
@@ -85,7 +92,7 @@ public class Simplex {
 		}
 
 		Matrix ut = Matrix.matrixProduct(new Matrix(ctb), B.reverseMatrix());
-		System.out.println("\nUt: " + ut);
+		//System.out.println("\nUt: " + ut);
 
 		// Creo vettore dei costi ridotto
 		double[][] cr = new double[1][A.getColumns()];
@@ -122,7 +129,7 @@ public class Simplex {
 				illim = false;
 		}
 
-		System.out.println("Colonna entrante: " + joiningColumn);
+		//System.out.println("Colonna entrante: " + joiningColumn);
 
 		// System.out.println("Colonna entrante: "+joiningColumn);
 
@@ -132,6 +139,8 @@ public class Simplex {
 	public Matrix compute() throws Exception {
 
 		while (!opt && !illim) {
+			System.out.println("Iterazione n."+it);
+			it++;
 
 			OPTResult optimality = this.testOpt();
 
@@ -141,7 +150,6 @@ public class Simplex {
 			if (this.opt) {
 
 				Matrix xstar = Matrix.matrixProduct(B.reverseMatrix(), b.transpose());
-				xstar.print("x* : \n");
 
 				double[] xstarb = new double[A.getColumns()];
 
@@ -149,8 +157,12 @@ public class Simplex {
 					xstarb[indexes[i] - 1] = xstar.getMatrix()[i][0];
 				}
 				Matrix xstarbm = new Matrix(xstarb);
-				xstarbm.print("x* : \n");
-				System.out.println("z*: "+Matrix.matrixProduct(c,xstarbm.transpose()).toValue());
+				xstarbm.print("Soluzione ottima : \n");
+				System.out.println("Valore ottimo: "+Matrix.matrixProduct(c,xstarbm.transpose()).toValue());
+				Punto pstar = LinearSystem.toPoint(xstarbm).toJavaCoordinates(25);
+				Piano.getPiano().setPunto(pstar,this.opt);
+				Piano.getPiano().setVettore(new Vettore(oldP,pstar,Color.RED));
+				
 				return xstarbm;
 			} else { // se la soluzione non � ottima
 
@@ -181,7 +193,7 @@ public class Simplex {
 					// Calcolo b barrato
 					Matrix bsm = Matrix.matrixProduct(B.reverseMatrix(), b.transpose());
 					double[][] bs = bsm.getMatrix();
-					bsm.print("b barrato: \n");
+					//bsm.print("b barrato: \n");
 
 					// Prendo Ah
 					Matrix Ah = illimResult.Ah;
@@ -200,19 +212,75 @@ public class Simplex {
 							min = temp[i];
 						}
 					}
-
+					
 					// La colonna da sostituire si trova nella posizione t+1
 					int t = Arrays.stream(temp).boxed().collect(Collectors.toList()).indexOf(min);
+					
+					//Disegno il punto
+					Matrix x = Matrix.matrixProduct(B.reverseMatrix(), b.transpose());
 
+					double[] xs = new double[A.getColumns()];
+
+					for (int i = 0; i < x.getRows(); i++) {
+						xs[indexes[i] - 1] = x.getMatrix()[i][0];
+					}
+					Matrix xsb = new Matrix(xs);
+					xsb.print("Soluzione ammissibile: \n");
+					Punto p = LinearSystem.toPoint(xsb).toJavaCoordinates(25);
+					Piano.getPiano().setVettore(new Vettore(oldP,p,Color.RED));
+					oldP = p;
+					Piano.getPiano().setPunto(p, false);
+					
 					// Scambio le colonne nella base
 					indexes[t] = h + 1;
 					this.B = updateBase();
-					Arrays.stream(indexes).boxed().collect(Collectors.toList()).forEach(System.out::println);
+					//Arrays.stream(indexes).boxed().collect(Collectors.toList()).forEach(System.out::println);
+					
+					
 				}
 			}
 
 		} // end while
 		return null;
 	}
+	
+	/*public static Matrix getPoints(Matrix A, int[] indexes, Matrix b) throws Exception {
+		
+		//Per vedere tutti gli indici che una base vedo quante colonne ha A
+		int k = A.getColumns();
+		
+		//Mi serve un metodo che rimuova determinate colonne da A
+		Matrix[] basi = new Matrix[A.getColumns()];
+		for(int i = 1; i < basi.length + 1; i++) {
+			
+			basi[i-1] = A.sliceColumns(i, (i+1)%basi.length+1);
+		}
+		
+		//Mi serve un metodo che accorpi determinate colonne
+		
+		//Costruisco la base partendo dagli indici dati
+		double[][] bTemp = new double[indexes.length][indexes.length];
+		for (int i = 0; i < indexes.length; i++) {
+
+			Matrix slicedColumn = A.selectColumn(indexes[i]).transpose();
+			for (int j = 0; j < indexes.length; j++) {
+				bTemp[i][j] = slicedColumn.getMatrix()[0][j];
+			}
+		}
+
+		Matrix result = new Matrix(bTemp).transpose();
+		result.print("Base: \n");
+		
+		Matrix m = LinearSystem.solve(result, b).transpose();
+		m.print("Soluzioni trasposte: \n");
+		Punto p = new Punto();
+		for(int i = 0; i < indexes.length; i++) {
+			if( indexes[i] == 1) p.setX(m.getMatrix()[0][i]);
+			if( indexes[i] == 2) p.setY(m.getMatrix()[0][i]);
+		}
+		System.out.println("x: "+p.getX()+" y: "+p.getY());
+		
+		return result;
+	}*/
 
 }

@@ -2,6 +2,8 @@ package simplex.graph.plot;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
@@ -88,6 +90,26 @@ public class Piano extends AnchorPane {
 		this.getChildren().remove(this.funzione);
 		this.funzione= f.drawFunction(DIM_TACKS);
 		this.getChildren().add(this.funzione);
+	}
+	
+	public void setVettore(Vettore v) {
+		if(v == null) return;
+		this.getChildren().add(v);
+	}
+	
+	public void setPunto(Punto p, boolean opt) {
+		Circle c = new Circle();
+		c.setCenterX(p.getX());
+		c.setCenterY(p.getY());
+		c.setFill(Color.BLUE);
+		c.setRadius(3);
+		this.getChildren().add(c);
+		Label l;
+		if(opt) l = new Label("x*");
+		else l = new Label("x");
+		l.setTranslateX(p.getX()+5);
+		l.setTranslateY(p.getY()-18);
+		this.getChildren().add(l);
 	}
 
 	public int getNumTacks() {
